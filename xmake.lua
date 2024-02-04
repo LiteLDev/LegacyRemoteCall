@@ -6,7 +6,7 @@ add_requires("levilamina")
 
 set_runtimes("MD")
 
-target("LSERemoteCall")
+target("LegacyRemoteCall")
     add_cxflags(
         "/EHa",
         "/utf-8"
