@@ -3,6 +3,10 @@
 #include <ll/api/plugin/NativePlugin.h>
 #include <memory>
 
+namespace RemoteCall {
+extern void removeAllFunc();
+}
+
 namespace LegacyRemoteCall {
 
 LegacyRemoteCall::LegacyRemoteCall() = default;
@@ -17,25 +21,13 @@ ll::plugin::NativePlugin& LegacyRemoteCall::getSelf() const { return *mSelf; }
 bool LegacyRemoteCall::load(ll::plugin::NativePlugin& self) {
     mSelf = std::addressof(self);
     getSelf().getLogger().info("loading...");
-
-    // Code for loading the plugin goes here.
-
     return true;
 }
 
-bool LegacyRemoteCall::enable() {
-    getSelf().getLogger().info("enabling...");
-
-    // Code for enabling the plugin goes here.
-
-    return true;
-}
+bool LegacyRemoteCall::enable() { return true; }
 
 bool LegacyRemoteCall::disable() {
-    getSelf().getLogger().info("disabling...");
-
-    // Code for disabling the plugin goes here.
-
+    RemoteCall::removeAllFunc();
     return true;
 }
 

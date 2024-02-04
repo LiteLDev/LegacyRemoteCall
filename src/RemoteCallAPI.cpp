@@ -63,6 +63,8 @@ int removeFuncs(std::vector<std::pair<std::string, std::string>>& funcs) {
     return count;
 }
 
+void removeAllFunc() { exportedFuncs.clear(); }
+
 } // namespace RemoteCall
 
 static_assert(RemoteCall::is_supported_type_v<void>);
