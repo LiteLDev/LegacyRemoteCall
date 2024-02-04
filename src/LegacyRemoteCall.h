@@ -2,18 +2,18 @@
 
 #include <ll/api/plugin/NativePlugin.h>
 
-namespace rename_this {
+namespace LegacyRemoteCall {
 
-class RenameThis {
-    RenameThis();
+class LegacyRemoteCall {
+    LegacyRemoteCall();
 
 public:
-    RenameThis(RenameThis&&)                 = delete;
-    RenameThis(const RenameThis&)            = delete;
-    RenameThis& operator=(RenameThis&&)      = delete;
-    RenameThis& operator=(const RenameThis&) = delete;
+    LegacyRemoteCall(LegacyRemoteCall&&)                 = delete;
+    LegacyRemoteCall(const LegacyRemoteCall&)            = delete;
+    LegacyRemoteCall& operator=(LegacyRemoteCall&&)      = delete;
+    LegacyRemoteCall& operator=(const LegacyRemoteCall&) = delete;
 
-    static RenameThis& getInstance();
+    static LegacyRemoteCall& getInstance();
 
     [[nodiscard]] ll::plugin::NativePlugin& getSelf() const;
 
@@ -30,4 +30,4 @@ private:
     ll::plugin::NativePlugin* mSelf{};
 };
 
-} // namespace rename_this
+} // namespace LegacyRemoteCall
