@@ -13,7 +13,7 @@
             "legacyscriptengine"
         ]
     },
-    "asset_url": "https://github.com/LiteLDev/LegacyRemoteCall/releases/download/v0.1.1/LegacyRemoteCall-windows-x64.zip",
+    "asset_url": "https://github.com/LiteLDev/LegacyRemoteCall/releases/download/v0.2.0/LegacyRemoteCall-windows-x64.zip",
     "prerequisites": {
         "github.com/LiteLDev/LeviLamina": "0.7.x"
     },
