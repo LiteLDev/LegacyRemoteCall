@@ -6,7 +6,7 @@
 #include "ll/api/plugin/Plugin.h"
 #include "ll/api/utils/StringUtils.h"
 
-#define logger LegacyRemoteCall ::LegacyRemoteCall::getInstance().getSelf().getLogger()
+#define logger legacy_remotecallapi::LegacyRemoteCallAPI::getInstance().getSelf().getLogger()
 
 namespace RemoteCall {
 CallbackFn const                                              EMPTY_FUNC{};

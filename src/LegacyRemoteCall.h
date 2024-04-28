@@ -1,24 +1,20 @@
 #pragma once
 
-#include <ll/api/plugin/NativePlugin.h>
+#include "ll/api/plugin/NativePlugin.h"
 
-namespace LegacyRemoteCall {
+namespace legacy_remotecallapi {
 
-class LegacyRemoteCall {
-    LegacyRemoteCall();
+class LegacyRemoteCallAPI {
 
 public:
-    LegacyRemoteCall(LegacyRemoteCall&&)                 = delete;
-    LegacyRemoteCall(const LegacyRemoteCall&)            = delete;
-    LegacyRemoteCall& operator=(LegacyRemoteCall&&)      = delete;
-    LegacyRemoteCall& operator=(const LegacyRemoteCall&) = delete;
+    static LegacyRemoteCallAPI& getInstance();
 
-    static LegacyRemoteCall& getInstance();
+    LegacyRemoteCallAPI(ll::plugin::NativePlugin& self) : mSelf(self) {}
 
-    [[nodiscard]] ll::plugin::NativePlugin& getSelf() const;
+    [[nodiscard]] ll::plugin::NativePlugin& getSelf() const { return mSelf; }
 
     /// @return True if the plugin is loaded successfully.
-    bool load(ll::plugin::NativePlugin&);
+    bool load();
 
     /// @return True if the plugin is enabled successfully.
     bool enable();
@@ -26,8 +22,12 @@ public:
     /// @return True if the plugin is disabled successfully.
     bool disable();
 
+    // TODO: Implement this method if you need to unload the plugin.
+    // /// @return True if the plugin is unloaded successfully.
+    // bool unload();
+
 private:
-    ll::plugin::NativePlugin* mSelf{};
+    ll::plugin::NativePlugin& mSelf;
 };
 
-} // namespace LegacyRemoteCall
+} // namespace legacy_remotecallapi
