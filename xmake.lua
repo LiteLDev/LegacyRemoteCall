@@ -2,7 +2,7 @@ add_rules("mode.debug", "mode.release", "mode.releasedbg")
 
 add_repositories("liteldev-repo https://github.com/LiteLDev/xmake-repo.git")
 
-add_requires("levilamina 0.12.0")
+add_requires("levilamina develop")
 
 set_runtimes("MD")
 
