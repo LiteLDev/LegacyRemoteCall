@@ -2,7 +2,7 @@ add_rules("mode.debug", "mode.release", "mode.releasedbg")
 
 add_repositories("liteldev-repo https://github.com/LiteLDev/xmake-repo.git")
 
-add_requires("levilamina 0.13.0")
+add_requires("levilamina 0.13.4")
 
 set_runtimes("MD")
 
@@ -12,7 +12,6 @@ target("LegacyRemoteCall")
         "/utf-8"
     )
     add_defines(
-        "_HAS_CXX23=1",
         "NOMINMAX",
         "UNICODE"
     )

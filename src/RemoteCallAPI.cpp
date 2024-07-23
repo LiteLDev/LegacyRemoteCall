@@ -2,9 +2,9 @@
 
 #include "LegacyRemoteCall.h"
 #include "ll/api/Logger.h"
-#include "ll/api/plugin/NativePlugin.h"
-#include "ll/api/plugin/Plugin.h"
+#include "ll/api/mod/NativeMod.h"
 #include "ll/api/utils/StringUtils.h"
+
 
 #define logger legacy_remotecallapi::LegacyRemoteCallAPI::getInstance().getSelf().getLogger()
 
@@ -40,7 +40,7 @@ bool removeFunc(std::string const& nameSpace, std::string const& funcName) {
 
 void _onCallError(std::string const& msg, void* handle) {
     logger.error(msg);
-    auto plugin = ll::plugin::NativePlugin::getByHandle(handle);
+    auto plugin = ll::mod::NativeMod::getByHandle(handle);
     if (plugin) logger.error("In plugin <{}>", plugin->getManifest().name);
 }
 

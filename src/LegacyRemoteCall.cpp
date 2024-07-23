@@ -1,7 +1,7 @@
 #include "LegacyRemoteCall.h"
 
-#include "ll/api/plugin/NativePlugin.h"
-#include "ll/api/plugin/RegisterHelper.h"
+#include "ll/api/mod/NativeMod.h"
+#include "ll/api/mod/RegisterHelper.h"
 
 #include <memory>
 
@@ -36,4 +36,4 @@ bool LegacyRemoteCallAPI::disable() {
 
 } // namespace legacy_remotecallapi
 
-LL_REGISTER_PLUGIN(legacy_remotecallapi::LegacyRemoteCallAPI, legacy_remotecallapi::instance);
+LL_REGISTER_MOD(legacy_remotecallapi::LegacyRemoteCallAPI, legacy_remotecallapi::instance);

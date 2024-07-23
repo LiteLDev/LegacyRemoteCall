@@ -1,6 +1,6 @@
 #pragma once
 #include "fmt/format.h"
-#include "ll/api/utils/WinUtils.h"
+#include "ll/api/utils/SystemUtils.h"
 #include "mc/nbt/CompoundTag.h"
 #include "mc/world/Container.h"
 #include "mc/world/actor/player/Player.h"
@@ -401,7 +401,7 @@ __declspec(dllexport) bool exportFunc(
     std::string const& nameSpace,
     std::string const& funcName,
     CallbackFn&&       callback,
-    void*              handle = ll::win_utils::getCurrentModuleHandle()
+    void*              handle = ll::sys_utils::getCurrentModuleHandle()
 );
 __declspec(dllexport) CallbackFn const& importFunc(std::string const& nameSpace, std::string const& funcName);
 
@@ -420,14 +420,14 @@ _exportAs(std::string const& nameSpace, std::string const& funcName, std::functi
             return pack(callback(extract<Args>(_expandArg(args, index))...));
         }
     };
-    return exportFunc(nameSpace, funcName, std::move(cb), ll::win_utils::getCurrentModuleHandle());
+    return exportFunc(nameSpace, funcName, std::move(cb), ll::sys_utils::getCurrentModuleHandle());
 }
 
 __declspec(dllexport) bool hasFunc(std::string const& nameSpace, std::string const& funcName);
 __declspec(dllexport) bool removeFunc(std::string const& nameSpace, std::string const& funcName);
 __declspec(dllexport) int removeNameSpace(std::string const& nameSpace);
 __declspec(dllexport) int removeFuncs(std::vector<std::pair<std::string, std::string>>& funcs);
-__declspec(dllexport) void _onCallError(std::string const& msg, void* handle = ll::win_utils::getCurrentModuleHandle());
+__declspec(dllexport) void _onCallError(std::string const& msg, void* handle = ll::sys_utils::getCurrentModuleHandle());
 
 template <typename RTN, typename... Args>
 inline bool _importAs(std::string const& nameSpace, std::string const& funcName, std::function<RTN(Args...)>& func) {
