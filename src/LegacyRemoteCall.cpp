@@ -15,21 +15,11 @@ static std::unique_ptr<LegacyRemoteCallAPI> instance;
 
 LegacyRemoteCallAPI& LegacyRemoteCallAPI::getInstance() { return *instance; }
 
-bool LegacyRemoteCallAPI::load() {
-    getSelf().getLogger().info("Loading...");
-    // Code for loading the plugin goes here.
-    return true;
-}
+bool LegacyRemoteCallAPI::load() { return true; }
 
-bool LegacyRemoteCallAPI::enable() {
-    getSelf().getLogger().info("Enabling...");
-    // Code for enabling the plugin goes here.
-    return true;
-}
+bool LegacyRemoteCallAPI::enable() { return true; }
 
 bool LegacyRemoteCallAPI::disable() {
-    getSelf().getLogger().info("Disabling...");
-    // Code for disabling the plugin goes here.
     RemoteCall::removeAllFunc();
     return true;
 }
