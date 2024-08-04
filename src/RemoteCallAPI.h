@@ -1,5 +1,5 @@
 #pragma once
-#include "fmt/format.h"
+#include "fmt/core.h"
 #include "ll/api/utils/SystemUtils.h"
 #include "mc/nbt/CompoundTag.h"
 #include "mc/world/Container.h"

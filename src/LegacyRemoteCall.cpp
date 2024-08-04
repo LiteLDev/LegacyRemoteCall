@@ -1,11 +1,8 @@
 #include "LegacyRemoteCall.h"
 
-#include "ll/api/mod/NativeMod.h"
 #include "ll/api/mod/RegisterHelper.h"
 
 #include <memory>
-
-
 namespace RemoteCall {
 extern void removeAllFunc();
 }
