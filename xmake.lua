@@ -1,43 +1,41 @@
-add_rules("mode.debug", "mode.release", "mode.releasedbg")
+add_rules("mode.debug", "mode.release")
 
 add_repositories("liteldev-repo https://github.com/LiteLDev/xmake-repo.git")
 
-add_requires("levilamina 0.13.5")
+if is_config("target_type", "server") then
+    add_requires("levilamina develop", {configs = {target_type = "server"}})
+else
+    add_requires("levilamina develop", {configs = {target_type = "client"}})
+end
 
-set_runtimes("MD")
+add_requires("levibuildscript")
 
-target("LegacyRemoteCall")
-    add_cxflags(
-        "/EHa",
-        "/utf-8"
-    )
-    add_defines(
-        "NOMINMAX",
-        "UNICODE"
-    )
-    add_files(
-        "src/**.cpp"
-    )
-    add_includedirs(
-        "src"
-    )
-    add_packages(
-        "levilamina"
-    )
-    add_shflags(
-        "/DELAYLOAD:bedrock_server.dll"
-    )
+if not has_config("vs_runtime") then
+    set_runtimes("MD")
+end
+
+option("target_type")
+    set_default("server")
+    set_showmenu(true)
+    set_values("server", "client")
+option_end()
+
+target("legacy-remote-call-api")
+    add_rules("@levibuildscript/linkrule")
+    add_rules("@levibuildscript/modpacker")
+    add_cxflags( "/EHa", "/utf-8", "/W4", "/w44265", "/w44289", "/w44296", "/w45263", "/w44738", "/w45204")
+    add_defines("NOMINMAX", "UNICODE")
+    add_packages("levilamina")
     set_exceptions("none")
     set_kind("shared")
-    set_languages("cxx20")
-
-    after_build(function (target)
-        local plugin_packer = import("scripts.after_build")
-
-        local plugin_define = {
-            pluginName = target:name(),
-            pluginFile = path.filename(target:targetfile()),
-        }
-        
-        plugin_packer.pack_plugin(target,plugin_define)
-    end)
+    set_languages("c++20")
+    set_symbols("debug")
+    add_files("src/**.cpp")
+    add_includedirs("src")
+    -- if is_config("target_type", "server") then
+    --     add_includedirs("src-server")
+    --     add_files("src-server/**.cpp")
+    -- else
+    --     add_includedirs("src-client")
+    --     add_files("src-client/**.cpp")
+    -- end

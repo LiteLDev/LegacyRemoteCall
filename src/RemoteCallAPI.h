@@ -5,13 +5,12 @@
 #include "mc/world/Container.h"
 #include "mc/world/actor/player/Player.h"
 #include "mc/world/item/ItemStackBase.h"
-#include "mc/world/item/registry/ItemStack.h"
+#include "mc/world/item/ItemStack.h"
 #include "mc/world/level/BlockPos.h"
 #include "mc/world/level/block/Block.h"
 #include "mc/world/level/block/actor/BlockActor.h"
+#include "mc/deps/core/math/Vec3.h"
 
-#define _AMD64_
-#include <minwindef.h>
 #define TEST_NEW_VALUE_TYPE
 
 ///////////////////////////////////////////////////////
@@ -97,7 +96,7 @@ struct BlockType {
     int          dimension;
     BlockType(Block* block) : block(block){};
     BlockType(Block const* ptr) : block(ptr) {
-        blockPos  = BlockPos::ZERO;
+        blockPos  = BlockPos::ZERO();
         dimension = 0;
     };
     template <typename RTN>
@@ -138,7 +137,7 @@ struct NumberType {
 };
 
 struct WorldPosType {
-    Vec3 pos   = Vec3::ZERO;
+    Vec3 pos   = Vec3::ZERO();
     int  dimId = 3; // VanillaDimensions::Undefined;
     WorldPosType(Vec3 const& pos, int dimId = 3) : pos(pos), dimId(dimId){};
     WorldPosType(std::pair<Vec3, int> const& pos) : pos(pos.first), dimId(pos.second){};
@@ -163,7 +162,7 @@ struct WorldPosType {
 };
 
 struct BlockPosType {
-    BlockPos pos   = BlockPos::ZERO;
+    BlockPos pos   = BlockPos::ZERO();
     int      dimId = 0;
     BlockPosType(BlockPos const& pos, int dimId = 0) : pos(pos), dimId(dimId){};
     BlockPosType(std::pair<BlockPos, int> const& pos) : pos(pos.first), dimId(pos.second){};
@@ -341,9 +340,8 @@ ValueType packValue(T val) {
         return ValueType(static_cast<Player*>(std::forward<T>(val)));
     else if constexpr (std::is_base_of_v<Actor, std::remove_pointer_t<T>>)
         return ValueType(static_cast<Actor*>(std::forward<T>(val)));
-    else if constexpr (std::is_void_v<RawType>) return ValueType();
+    else if constexpr (std::is_void_v<RawType>) return {};
     throw std::runtime_error(fmt::format(__FUNCTION__ " - Unsupported Type: {}", typeid(T).name()).c_str());
-    return ValueType();
 }
 template <typename T>
 std::vector<ValueType> packArray(std::vector<T> const& val) {
@@ -447,7 +445,7 @@ inline bool _importAs(std::string const& nameSpace, std::string const& funcName,
 template <typename CB, typename Func = std::conditional_t<std::is_function_v<CB>, std::function<CB>, CB>>
 inline Func importAs(std::string const& nameSpace, std::string const& funcName) {
     Func callback{};
-    bool res = _importAs(nameSpace, funcName, callback);
+    _importAs(nameSpace, funcName, callback);
     return std::move(callback);
 }
 
@@ -456,4 +454,4 @@ inline bool exportAs(std::string const& nameSpace, std::string const& funcName, 
     return _exportAs(nameSpace, funcName, std::function(std::move(callback)));
 }
 
-}; // namespace RemoteCall
+} // namespace RemoteCall

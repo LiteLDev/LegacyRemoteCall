@@ -2,15 +2,15 @@
 
 #include "ll/api/mod/RegisterHelper.h"
 
-#include <memory>
 namespace RemoteCall {
 extern void removeAllFunc();
 }
-namespace legacy_remotecallapi {
+namespace legacy_remote_call_api {
 
-static std::unique_ptr<LegacyRemoteCallAPI> instance;
-
-LegacyRemoteCallAPI& LegacyRemoteCallAPI::getInstance() { return *instance; }
+LegacyRemoteCallAPI& LegacyRemoteCallAPI::getInstance() {
+    static LegacyRemoteCallAPI instance;
+    return instance;
+}
 
 bool LegacyRemoteCallAPI::load() { return true; }
 
@@ -23,4 +23,4 @@ bool LegacyRemoteCallAPI::disable() {
 
 } // namespace legacy_remotecallapi
 
-LL_REGISTER_MOD(legacy_remotecallapi::LegacyRemoteCallAPI, legacy_remotecallapi::instance);
+LL_REGISTER_MOD(legacy_remote_call_api::LegacyRemoteCallAPI, legacy_remote_call_api::LegacyRemoteCallAPI::getInstance());

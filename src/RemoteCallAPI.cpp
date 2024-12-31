@@ -1,20 +1,19 @@
 #include "RemoteCallAPI.h"
 
 #include "LegacyRemoteCall.h"
-#include "ll/api/Logger.h"
+#include "ll/api/io/Logger.h"
 #include "ll/api/mod/NativeMod.h"
 #include "ll/api/utils/StringUtils.h"
-
-
-#define logger legacy_remotecallapi::LegacyRemoteCallAPI::getInstance().getSelf().getLogger()
 
 namespace RemoteCall {
 CallbackFn const                                              EMPTY_FUNC{};
 std::unordered_map<std::string, RemoteCall::ExportedFuncData> exportedFuncs;
 
+ll::io::Logger& getLogger() { return legacy_remote_call_api::LegacyRemoteCallAPI::getInstance().getSelf().getLogger();}
+
 bool exportFunc(std::string const& nameSpace, std::string const& funcName, CallbackFn&& callback, void* handle) {
     if (nameSpace.find("::") != std::string::npos) {
-        logger.error("Namespace can't includes \"::\"");
+        getLogger().error("Namespace can't includes \"::\"");
         return false;
     }
     if (exportedFuncs.count(nameSpace + "::" + funcName) != 0) return false;
@@ -39,9 +38,9 @@ bool removeFunc(std::string const& nameSpace, std::string const& funcName) {
 }
 
 void _onCallError(std::string const& msg, void* handle) {
-    logger.error(msg);
+    getLogger().error(msg);
     auto plugin = ll::mod::NativeMod::getByHandle(handle);
-    if (plugin) logger.error("In plugin <{}>", plugin->getManifest().name);
+    if (plugin) getLogger().error("In plugin <{}>", plugin->getManifest().name);
 }
 
 int removeNameSpace(std::string const& nameSpace) {
