@@ -20,7 +20,7 @@ option("target_type")
     set_values("server", "client")
 option_end()
 
-target("legacy-remote-call-api")
+target("LegacyRemoteCall")
     add_rules("@levibuildscript/linkrule")
     add_rules("@levibuildscript/modpacker")
     add_cxflags( "/EHa", "/utf-8", "/W4", "/w44265", "/w44289", "/w44296", "/w45263", "/w44738", "/w45204")
