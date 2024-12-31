@@ -4,12 +4,11 @@
 #include "mc/nbt/CompoundTag.h"
 #include "mc/world/Container.h"
 #include "mc/world/actor/player/Player.h"
-#include "mc/world/item/ItemStackBase.h"
 #include "mc/world/item/ItemStack.h"
+#include "mc/deps/core/math/Vec3.h"
 #include "mc/world/level/BlockPos.h"
 #include "mc/world/level/block/Block.h"
 #include "mc/world/level/block/actor/BlockActor.h"
-#include "mc/deps/core/math/Vec3.h"
 
 #define TEST_NEW_VALUE_TYPE
 
