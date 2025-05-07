@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.11.0] - 2025-05-07
+
+- Support LeviLamina 1.2.0-rc.1
+
 ## [0.10.2] - 2025-04-15
 
 - Fixed tooth.json
