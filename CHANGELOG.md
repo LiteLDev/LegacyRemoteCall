@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.11.1] - 2025-05-20
+
+- Support LeviLamina 1.2.0-rc.2
+
 ## [0.11.0] - 2025-05-07
 
 - Support LeviLamina 1.2.0-rc.1
@@ -29,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Support LeviLamina 1.0.0-rc.3
 
+[0.11.1]: https://github.com/LiteLDev/LegacyRemoteCall/compare/v0.11.0...v0.11.1
+[0.11.0]: https://github.com/LiteLDev/LegacyRemoteCall/compare/v0.10.2...v0.11.0
 [0.10.2]: https://github.com/LiteLDev/LegacyRemoteCall/compare/v0.10.1...v0.10.2
 [0.10.1]: https://github.com/LiteLDev/LegacyRemoteCall/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/LiteLDev/LegacyRemoteCall/compare/v0.9.0...v0.10.0
