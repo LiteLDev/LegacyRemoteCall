@@ -2,6 +2,7 @@
     "name": "${modName}",
     "entry": "${modFile}",
     "version": "${modVersion}",
+    "platform": "${modPlatform}",
     "type": "native",
     "description": "A part of LegacyScriptEngine",
     "author": "LiteLDev"
