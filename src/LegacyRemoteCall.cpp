@@ -3,8 +3,8 @@
 #include "ll/api/mod/RegisterHelper.h"
 
 namespace RemoteCall {
-extern void removeAllFunc();
-}
+void removeAllFunc();
+} // namespace RemoteCall
 namespace legacy_remote_call_api {
 
 LegacyRemoteCallAPI& LegacyRemoteCallAPI::getInstance() {
@@ -12,15 +12,18 @@ LegacyRemoteCallAPI& LegacyRemoteCallAPI::getInstance() {
     return instance;
 }
 
-bool LegacyRemoteCallAPI::load() { return true; }
+bool LegacyRemoteCallAPI::load() /*NOLINT*/ { return true; }
 
-bool LegacyRemoteCallAPI::enable() { return true; }
+bool LegacyRemoteCallAPI::enable() /*NOLINT*/ { return true; }
 
-bool LegacyRemoteCallAPI::disable() {
+bool LegacyRemoteCallAPI::disable() /*NOLINT*/ {
     RemoteCall::removeAllFunc();
     return true;
 }
 
-} // namespace legacy_remotecallapi
+} // namespace legacy_remote_call_api
 
-LL_REGISTER_MOD(legacy_remote_call_api::LegacyRemoteCallAPI, legacy_remote_call_api::LegacyRemoteCallAPI::getInstance());
+LL_REGISTER_MOD(
+    legacy_remote_call_api::LegacyRemoteCallAPI,
+    legacy_remote_call_api::LegacyRemoteCallAPI::getInstance()
+);

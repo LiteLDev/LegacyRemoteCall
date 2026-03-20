@@ -1,16 +1,21 @@
 #pragma once
 #include "fmt/core.h"
+#include "ll/api/base/TypeTraits.h"
 #include "ll/api/utils/SystemUtils.h"
+#include "mc/deps/core/math/Vec3.h"
 #include "mc/nbt/CompoundTag.h"
 #include "mc/world/Container.h"
 #include "mc/world/actor/player/Player.h"
 #include "mc/world/item/ItemStack.h"
-#include "mc/deps/core/math/Vec3.h"
 #include "mc/world/level/BlockPos.h"
 #include "mc/world/level/block/Block.h"
 #include "mc/world/level/block/actor/BlockActor.h"
 
-#define TEST_NEW_VALUE_TYPE
+#ifdef REMOTE_CALL_EXPORT
+#define REMOTE_CALL_API __declspec(dllexport)
+#else
+#define REMOTE_CALL_API __declspec(dllimport)
+#endif
 
 ///////////////////////////////////////////////////////
 // Remote Call API
@@ -30,14 +35,49 @@
 // logger.info(`Size of str: ${strSize("12345678")}`);
 //
 /////////////////////////////////////////////////////
+
 namespace RemoteCall {
-#ifdef TEST_NEW_VALUE_TYPE
-// .....
 struct NbtType {
     CompoundTag const* ptr = nullptr;
     bool               own = false;
-    NbtType(std::unique_ptr<CompoundTag> tag) : ptr(tag.release()), own(true){};
-    NbtType(CompoundTag const* ptr) : ptr(ptr), own(false){};
+    NbtType(std::unique_ptr<CompoundTag> tag) noexcept /*NOLINT*/ : ptr(tag.release()), own(true) {}
+    NbtType(CompoundTag const* ptr) noexcept /*NOLINT*/ : ptr(ptr), own(false) {}
+    NbtType(NbtType const& other) {
+        if (other.own) {
+            ptr = new CompoundTag(*other.ptr);
+            own = true;
+        } else {
+            ptr = other.ptr;
+            own = false;
+        }
+    }
+    NbtType(NbtType&& other) noexcept {
+        std::swap(ptr, other.ptr);
+        std::swap(own, other.own);
+    }
+    NbtType& operator=(NbtType const& other) {
+        if (this != &other) {
+            if (own) delete const_cast<CompoundTag*>(ptr);
+            if (other.own) {
+                ptr = new CompoundTag(*other.ptr);
+                own = true;
+            } else {
+                ptr = other.ptr;
+                own = false;
+            }
+        }
+        return *this;
+    }
+    NbtType& operator=(NbtType&& other) noexcept {
+        std::swap(ptr, other.ptr);
+        std::swap(own, other.own);
+        return *this;
+    }
+    ~NbtType() {
+        if (own) {
+            delete const_cast<CompoundTag*>(ptr);
+        }
+    }
     inline std::unique_ptr<CompoundTag> tryGetUniquePtr() {
         if (!own) return {};
         own       = false;
@@ -64,8 +104,44 @@ struct NbtType {
 struct ItemType {
     ItemStack const* ptr = nullptr;
     bool             own = false;
-    ItemType(std::unique_ptr<ItemStack> tag) : ptr(tag.release()), own(true){};
-    ItemType(ItemStack const* ptr) : ptr(ptr), own(false){};
+    ItemType(std::unique_ptr<ItemStack> tag) noexcept /*NOLINT*/ : ptr(tag.release()), own(true) {}
+    ItemType(ItemStack const* ptr) noexcept /*NOLINT*/ : ptr(ptr), own(false) {}
+    ItemType(ItemType const& other) {
+        if (other.own) {
+            ptr = new ItemStack(*other.ptr);
+            own = true;
+        } else {
+            ptr = other.ptr;
+            own = false;
+        }
+    }
+    ItemType(ItemType&& other) noexcept {
+        std::swap(ptr, other.ptr);
+        std::swap(own, other.own);
+    }
+    ItemType& operator=(ItemType const& other) {
+        if (this != &other) {
+            if (own) delete const_cast<ItemStack*>(ptr);
+            if (other.own) {
+                ptr = new ItemStack(*other.ptr);
+                own = true;
+            } else {
+                ptr = other.ptr;
+                own = false;
+            }
+        }
+        return *this;
+    }
+    ItemType& operator=(ItemType&& other) noexcept {
+        std::swap(ptr, other.ptr);
+        std::swap(own, other.own);
+        return *this;
+    }
+    ~ItemType() {
+        if (own) {
+            delete const_cast<ItemStack*>(ptr);
+        }
+    }
     inline std::unique_ptr<ItemStack> tryGetUniquePtr() {
         if (!own) return {};
         own       = false;
@@ -93,8 +169,8 @@ struct BlockType {
     Block const* block;
     BlockPos     blockPos;
     int          dimension;
-    BlockType(Block* block) : block(block){};
-    BlockType(Block const* ptr) : block(ptr) {
+    BlockType(Block* block) noexcept /*NOLINT*/ : block(block) {};
+    BlockType(Block const* ptr) noexcept /*NOLINT*/ : block(ptr) {
         blockPos  = BlockPos::ZERO();
         dimension = 0;
     };
@@ -109,37 +185,34 @@ struct BlockType {
 struct NumberType {
     __int64 i = 0;
     double  f = 0;
-    NumberType(__int64 i, double f) : i(i), f(f){};
-    template <typename T>
-    std::enable_if_t<std::is_integral_v<T> || std::is_floating_point_v<T>, NumberType&> operator=(T v) {
+    NumberType(__int64 i, double f) : i(i), f(f) {};
+    template <typename T, std::enable_if_t<std::is_integral_v<T> || std::is_floating_point_v<T>>>
+    NumberType& operator=(T&& v) noexcept {
         i = static_cast<__int64>(v);
         f = static_cast<double>(v);
+        return *this;
     }
-    NumberType(double v) : i(static_cast<__int64>(v)), f(static_cast<double>(v)){};
-    NumberType(float v) : i(static_cast<__int64>(v)), f(static_cast<double>(v)){};
-    NumberType(__int64 v) : i(static_cast<__int64>(v)), f(static_cast<double>(v)){};
-    NumberType(int v) : i(static_cast<__int64>(v)), f(static_cast<double>(v)){};
-    NumberType(short v) : i(static_cast<__int64>(v)), f(static_cast<double>(v)){};
-    NumberType(char v) : i(static_cast<__int64>(v)), f(static_cast<double>(v)){};
-    NumberType(unsigned __int64 v) : i(static_cast<__int64>(v)), f(static_cast<double>(v)){};
-    NumberType(unsigned int v) : i(static_cast<__int64>(v)), f(static_cast<double>(v)){};
-    NumberType(unsigned short v) : i(static_cast<__int64>(v)), f(static_cast<double>(v)){};
-    NumberType(unsigned char v) : i(static_cast<__int64>(v)), f(static_cast<double>(v)){};
+    NumberType(double v) noexcept /*NOLINT*/ : i(static_cast<__int64>(v)), f(static_cast<double>(v)) {};
+    NumberType(float v) noexcept /*NOLINT*/ : i(static_cast<__int64>(v)), f(static_cast<double>(v)) {};
+    NumberType(__int64 v) noexcept /*NOLINT*/ : i(static_cast<__int64>(v)), f(static_cast<double>(v)) {};
+    NumberType(int v) noexcept /*NOLINT*/ : i(static_cast<__int64>(v)), f(static_cast<double>(v)) {};
+    NumberType(short v) noexcept /*NOLINT*/ : i(static_cast<__int64>(v)), f(static_cast<double>(v)) {};
+    NumberType(char v) noexcept /*NOLINT*/ : i(static_cast<__int64>(v)), f(static_cast<double>(v)) {};
+    NumberType(unsigned __int64 v) noexcept /*NOLINT*/ : i(static_cast<__int64>(v)), f(static_cast<double>(v)) {};
+    NumberType(unsigned int v) noexcept /*NOLINT*/ : i(static_cast<__int64>(v)), f(static_cast<double>(v)) {};
+    NumberType(unsigned short v) noexcept /*NOLINT*/ : i(static_cast<__int64>(v)), f(static_cast<double>(v)) {};
+    NumberType(unsigned char v) noexcept /*NOLINT*/ : i(static_cast<__int64>(v)), f(static_cast<double>(v)) {};
     template <typename RTN>
-    inline std::enable_if_t<std::is_integral_v<RTN>, RTN> get() {
+    inline std::enable_if_t<std::is_integral_v<RTN> || std::is_floating_point_v<RTN>, RTN> get() {
         return static_cast<RTN>(i);
-    };
-    template <typename RTN>
-    inline std::enable_if_t<std::is_floating_point_v<RTN>, RTN> get() {
-        return static_cast<RTN>(f);
     };
 };
 
 struct WorldPosType {
     Vec3 pos   = Vec3::ZERO();
     int  dimId = 3; // VanillaDimensions::Undefined;
-    WorldPosType(Vec3 const& pos, int dimId = 3) : pos(pos), dimId(dimId){};
-    WorldPosType(std::pair<Vec3, int> const& pos) : pos(pos.first), dimId(pos.second){};
+    WorldPosType(Vec3 const& pos, int dimId = 3) noexcept /*NOLINT*/ : pos(pos), dimId(dimId) {};
+    WorldPosType(std::pair<Vec3, int> const& pos) noexcept /*NOLINT*/ : pos(pos.first), dimId(pos.second) {};
     template <typename RTN>
     inline RTN get() = delete;
     template <>
@@ -163,8 +236,8 @@ struct WorldPosType {
 struct BlockPosType {
     BlockPos pos   = BlockPos::ZERO();
     int      dimId = 0;
-    BlockPosType(BlockPos const& pos, int dimId = 0) : pos(pos), dimId(dimId){};
-    BlockPosType(std::pair<BlockPos, int> const& pos) : pos(pos.first), dimId(pos.second){};
+    BlockPosType(BlockPos const& pos, int dimId = 0) noexcept /*NOLINT*/ : pos(pos), dimId(dimId) {};
+    BlockPosType(std::pair<BlockPos, int> const& pos) noexcept /*NOLINT*/ : pos(pos.first), dimId(pos.second) {};
     template <typename RTN>
     inline RTN get() = delete;
     template <>
@@ -187,89 +260,99 @@ struct BlockPosType {
 
 // std::string  -> json
 // std::string* -> bytes
-#define ExtraType                                                                                                      \
-    std::nullptr_t, NumberType, Player*, Actor*, BlockActor*, Container*, WorldPosType, BlockPosType, ItemType,        \
-        BlockType, NbtType
-#define ElementType bool, std::string, ExtraType
-template <typename _Ty, class... _Types>
-static constexpr bool is_one_of_v =
-    std::_Meta_find_unique_index<std::variant<_Types...>, _Ty>::value < sizeof...(_Types);
-template <typename _Ty>
-static constexpr bool is_extra_type_v = std::_Is_any_of_v<_Ty, ExtraType>;
+template <typename Ty>
+static constexpr bool is_extra_type_v = ll::traits::is_one_of_v<
+    Ty,
+    std::nullptr_t,
+    NumberType,
+    Player*,
+    Actor*,
+    BlockActor*,
+    Container*,
+    WorldPosType,
+    BlockPosType,
+    ItemType,
+    BlockType,
+    NbtType>;
 
-static_assert(sizeof(std::variant<ElementType>) == sizeof(std::string) + 8);
+
+static_assert(
+    sizeof(std::variant<
+           bool,
+           std ::string,
+           std ::nullptr_t,
+           NumberType,
+           Player*,
+           Actor*,
+           BlockActor*,
+           Container*,
+           WorldPosType,
+           BlockPosType,
+           ItemType,
+           BlockType,
+           NbtType>)
+    == 40
+);
 
 template <typename>
 constexpr bool is_vector_v = false;
-template <class _Ty, class _Alloc>
-constexpr bool is_vector_v<std::vector<_Ty, _Alloc>> = true;
+template <class Ty, class Alloc>
+constexpr bool is_vector_v<std::vector<Ty, Alloc>> = true;
 template <typename>
 constexpr bool is_map_v = false;
-template <class _Kty, class _Ty, class _Pr, class _Alloc>
-constexpr bool is_map_v<std::map<_Kty, _Ty, _Pr, _Alloc>> = true;
-template <class _Kty, class _Ty, class _Hasher, class _Keyeq, class _Alloc>
-constexpr bool is_map_v<std::unordered_map<_Kty, _Ty, _Hasher, _Keyeq, _Alloc>> = true;
-using Value                                                                     = std::variant<ElementType>;
-// struct Value
-//{
-//     std::variant<ElementType> value;
-//     Value(bool v)
-//         : value(v){};
-//     Value(__int64 v)
-//         : value(v){};
-//     Value(double v)
-//         : value(v){};
-//     Value(std::string const& v)
-//         : value(v){};
-//     Value(std::string* v)
-//         : value(v){};
-//     Value(Player* v)
-//         : value(v){};
-//     Value(Actor* v)
-//         : value(v){};
-//     Value(ItemStack* v)
-//         : value(v){};
-//     Value(Block* v)
-//         : value(v){};
-//     Value(BlockActor* v)
-//         : value(v){};
-//     Value(Container* v)
-//         : value(v){};
-//     Value(Vec3* v)
-//         : value(v){};
-//     Value(BlockPos* v)
-//         : value(v){};
-//     Value(CompoundTag* v)
-//         : value(v){};
-//     operator std::variant<ElementType>()
-//     {
-//         return value;
-//     }
-// };
+template <class Kty, class Ty, class Pr, class Alloc>
+constexpr bool is_map_v<std::map<Kty, Ty, Pr, Alloc>> = true;
+template <class Kty, class Ty, class Hasher, class Keyeq, class Alloc>
+constexpr bool is_map_v<std::unordered_map<Kty, Ty, Hasher, Keyeq, Alloc>> = true;
+using Value                                                                = std::variant<
+                                                                   bool,
+                                                                   std ::string,
+                                                                   std ::nullptr_t,
+                                                                   NumberType,
+                                                                   Player*,
+                                                                   Actor*,
+                                                                   BlockActor*,
+                                                                   Container*,
+                                                                   WorldPosType,
+                                                                   BlockPosType,
+                                                                   ItemType,
+                                                                   BlockType,
+                                                                   NbtType>;
+
 struct ValueType {
     using ArrayType  = std::vector<ValueType>;
     using ObjectType = std::unordered_map<std::string, ValueType>;
     using Type       = std::variant<Value, ArrayType, ObjectType>;
     Type value;
-    ValueType() : value({}){};
-    // ValueType(ValueType const& v) = delete;
-    // ValueType(Value const& v) = delete;
-    ValueType(Value&& v) : value(std::move(v)){};
-    ValueType(Value v) : value(std::move(v)){};
-    // ValueType(ValueType&& v) noexcept
-    //     : value(std::move(v.value)){};
-    ValueType(std::vector<ValueType>&& v) : value(std::move(v)){};
-    ValueType(std::unordered_map<std::string, ValueType>&& v) : value(std::move(v)){};
+    ValueType()                 = default;
+    ValueType(ValueType const&) = default;
+    ValueType(ValueType&&)      = default;
     template <typename T>
-    ValueType(T const& v) : value(Value(v)){};
+    ValueType(T&& v) /*NOLINT*/ : value(std::forward(v)) {}
 };
 
-template <typename _Ty>
+template <typename Ty>
 static constexpr bool is_supported_type_v =
-    std::is_void_v<_Ty> || is_one_of_v<_Ty, ElementType> || std::is_assignable_v<NumberType, _Ty>
-    || std::is_assignable_v<NbtType, _Ty> || std::is_assignable_v<BlockType, _Ty> || std::is_assignable_v<ItemType, _Ty>
-    || std::is_assignable_v<WorldPosType, _Ty> || std::is_assignable_v<BlockPosType, _Ty>
-    || std::is_base_of_v<Player, std::remove_pointer_t<_Ty>> || std::is_base_of_v<Actor, std::remove_pointer_t<_Ty>>;
+    std::is_void_v<Ty>
+    || ll::traits::is_one_of_v<
+        Ty,
+        bool,
+        std ::string,
+        std ::nullptr_t,
+        NumberType,
+        Player*,
+        Actor*,
+        BlockActor*,
+        Container*,
+        WorldPosType,
+        BlockPosType,
+        ItemType,
+        BlockType,
+        NbtType>
+    || std::is_assignable_v<NumberType, Ty> || std::is_assignable_v<NbtType, Ty> || std::is_assignable_v<BlockType, Ty>
+    || std::is_assignable_v<ItemType, Ty> || std::is_assignable_v<WorldPosType, Ty>
+    || std::is_assignable_v<BlockPosType, Ty> || std::is_base_of_v<Player, std::remove_pointer_t<Ty>>
+    || std::is_base_of_v<Actor, std::remove_pointer_t<Ty>>;
 
 template <typename RTN>
 RTN extract(ValueType&& val);
@@ -280,7 +363,22 @@ template <typename RTN>
 RTN extractValue(Value&& value) {
     using Type = std::remove_const_t<std::remove_reference_t<RTN>>;
     static_assert(is_supported_type_v<Type>, "Unsupported Type:");
-    if constexpr (is_one_of_v<Type, ElementType>) return std::get<Type>(value);
+    if constexpr (ll::traits::is_one_of_v<
+                      Type,
+                      bool,
+                      std ::string,
+                      std ::nullptr_t,
+                      NumberType,
+                      Player*,
+                      Actor*,
+                      BlockActor*,
+                      Container*,
+                      WorldPosType,
+                      BlockPosType,
+                      ItemType,
+                      BlockType,
+                      NbtType>)
+        return std::get<Type>(value);
     else if constexpr (std::is_assignable_v<NumberType, RTN>) return std::get<NumberType>(value).get<Type>();
     else if constexpr (std::is_assignable_v<NbtType, RTN>) return std::get<NbtType>(value).get<Type>();
     else if constexpr (std::is_assignable_v<ItemType, RTN>) return std::get<ItemType>(value).get<Type>();
@@ -328,7 +426,22 @@ template <typename T>
 ValueType packValue(T val) {
     using RawType = std::remove_reference_t<std::remove_const_t<T>>;
     static_assert(is_supported_type_v<RawType>, "Unsupported Type");
-    if constexpr (is_one_of_v<RawType, ElementType>) return ValueType(std::forward<T>(val));
+    if constexpr (ll::traits::is_one_of_v<
+                      RawType,
+                      bool,
+                      std ::string,
+                      std ::nullptr_t,
+                      NumberType,
+                      Player*,
+                      Actor*,
+                      BlockActor*,
+                      Container*,
+                      WorldPosType,
+                      BlockPosType,
+                      ItemType,
+                      BlockType,
+                      NbtType>)
+        return ValueType(std::forward<T>(val));
     else if constexpr (std::is_assignable_v<NumberType, T>) return ValueType(NumberType{std::forward<T>(val)});
     else if constexpr (std::is_assignable_v<NbtType, T>) return ValueType(NbtType(std::forward<T>(val)));
     else if constexpr (std::is_assignable_v<ItemType, T>) return ValueType(ItemType(std::forward<T>(val)));
@@ -369,22 +482,6 @@ ValueType pack(T val) {
     } else return packValue(std::forward<T>(val));
 }
 
-#else
-
-// Use string as value type because it is easy to convert between script types and native types
-using ValueType = std::string; // Json string
-
-template <typename T>
-std::remove_reference_t<T> extract(ValueType const& val) {
-    return nlohmann::json::parse(val).get<std::remove_reference_t<T>>();
-}
-
-template <typename T>
-ValueType pack(T const& val) {
-    return nlohmann::json(val).dump();
-}
-
-#endif // TEST_NEW_VALUE_TYPE
 
 using CallbackFn = std::function<ValueType(std::vector<ValueType>)>;
 
@@ -392,15 +489,14 @@ struct ExportedFuncData {
     void*      handle;
     CallbackFn callback;
 };
-
-__declspec(dllexport) extern CallbackFn const EMPTY_FUNC;
-__declspec(dllexport) bool exportFunc(
-    std::string const& nameSpace,
-    std::string const& funcName,
-    CallbackFn&&       callback,
-    void*              handle = ll::sys_utils::getCurrentModuleHandle()
-);
-__declspec(dllexport) CallbackFn const& importFunc(std::string const& nameSpace, std::string const& funcName);
+REMOTE_CALL_API extern CallbackFn const EMPTY_FUNC;
+REMOTE_CALL_API bool                    exportFunc(
+                       std::string const& nameSpace,
+                       std::string const& funcName,
+                       CallbackFn&&       callback,
+                       void*              handle = ll::sys_utils::getCurrentModuleHandle()
+                   );
+REMOTE_CALL_API CallbackFn const& importFunc(std::string const& nameSpace, std::string const& funcName);
 
 inline ValueType _expandArg(std::vector<ValueType>& args, int& index) { return std::move(args[--index]); }
 
@@ -408,11 +504,11 @@ template <typename RTN, typename... Args>
 inline bool
 _exportAs(std::string const& nameSpace, std::string const& funcName, std::function<RTN(Args...)>&& callback) {
     CallbackFn cb = [callback = std::move(callback)](std::vector<ValueType> args) -> ValueType {
-        if (sizeof...(Args) != args.size()) return std::move(ValueType());
+        if (sizeof...(Args) != args.size()) return {};
         int index = sizeof...(Args);
         if constexpr (std::is_void_v<RTN>) {
             callback(extract<Args>(_expandArg(args, index))...);
-            return std::move(ValueType());
+            return {};
         } else {
             return pack(callback(extract<Args>(_expandArg(args, index))...));
         }
@@ -420,11 +516,11 @@ _exportAs(std::string const& nameSpace, std::string const& funcName, std::functi
     return exportFunc(nameSpace, funcName, std::move(cb), ll::sys_utils::getCurrentModuleHandle());
 }
 
-__declspec(dllexport) bool hasFunc(std::string const& nameSpace, std::string const& funcName);
-__declspec(dllexport) bool removeFunc(std::string const& nameSpace, std::string const& funcName);
-__declspec(dllexport) int removeNameSpace(std::string const& nameSpace);
-__declspec(dllexport) int removeFuncs(std::vector<std::pair<std::string, std::string>>& funcs);
-__declspec(dllexport) void _onCallError(std::string const& msg, void* handle = ll::sys_utils::getCurrentModuleHandle());
+REMOTE_CALL_API bool hasFunc(std::string const& nameSpace, std::string const& funcName);
+REMOTE_CALL_API bool removeFunc(std::string const& nameSpace, std::string const& funcName);
+REMOTE_CALL_API int  removeNameSpace(std::string const& nameSpace);
+REMOTE_CALL_API int  removeFuncs(std::vector<std::pair<std::string, std::string>>& funcs);
+REMOTE_CALL_API void _onCallError(std::string const& msg, void* handle = ll::sys_utils::getCurrentModuleHandle());
 
 template <typename RTN, typename... Args>
 inline bool _importAs(std::string const& nameSpace, std::string const& funcName, std::function<RTN(Args...)>& func) {
@@ -450,7 +546,7 @@ inline Func importAs(std::string const& nameSpace, std::string const& funcName) 
 
 template <typename CB>
 inline bool exportAs(std::string const& nameSpace, std::string const& funcName, CB&& callback) {
-    return _exportAs(nameSpace, funcName, std::function(std::move(callback)));
+    return _exportAs(nameSpace, funcName, std::function(std::forward<CB>(callback)));
 }
 
 } // namespace RemoteCall
