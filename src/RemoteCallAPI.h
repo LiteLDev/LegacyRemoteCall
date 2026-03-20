@@ -11,8 +11,11 @@
 #include "mc/world/level/block/Block.h"
 #include "mc/world/level/block/actor/BlockActor.h"
 
-
-#define TEST_NEW_VALUE_TYPE
+#ifdef REMOTE_CALL_EXPORT
+#define REMOTE_CALL_API __declspec(dllexport)
+#else
+#define REMOTE_CALL_API __declspec(dllimport)
+#endif
 
 ///////////////////////////////////////////////////////
 // Remote Call API
@@ -32,9 +35,8 @@
 // logger.info(`Size of str: ${strSize("12345678")}`);
 //
 /////////////////////////////////////////////////////
+
 namespace RemoteCall {
-#ifdef TEST_NEW_VALUE_TYPE
-// .....
 struct NbtType {
     CompoundTag const* ptr = nullptr;
     bool               own = false;
@@ -289,7 +291,7 @@ static_assert(
            ItemType,
            BlockType,
            NbtType>)
-    == sizeof(std::string) + 8
+    == 40
 );
 
 template <typename>
@@ -316,58 +318,17 @@ using Value                                                                = std
                                                                    ItemType,
                                                                    BlockType,
                                                                    NbtType>;
-// struct Value
-//{
-//     std::variant<ElementType> value;
-//     Value(bool v)
-//         : value(v){};
-//     Value(__int64 v)
-//         : value(v){};
-//     Value(double v)
-//         : value(v){};
-//     Value(std::string const& v)
-//         : value(v){};
-//     Value(std::string* v)
-//         : value(v){};
-//     Value(Player* v)
-//         : value(v){};
-//     Value(Actor* v)
-//         : value(v){};
-//     Value(ItemStack* v)
-//         : value(v){};
-//     Value(Block* v)
-//         : value(v){};
-//     Value(BlockActor* v)
-//         : value(v){};
-//     Value(Container* v)
-//         : value(v){};
-//     Value(Vec3* v)
-//         : value(v){};
-//     Value(BlockPos* v)
-//         : value(v){};
-//     Value(CompoundTag* v)
-//         : value(v){};
-//     operator std::variant<ElementType>()
-//     {
-//         return value;
-//     }
-// };
+
 struct ValueType {
     using ArrayType  = std::vector<ValueType>;
     using ObjectType = std::unordered_map<std::string, ValueType>;
     using Type       = std::variant<Value, ArrayType, ObjectType>;
     Type value;
-    ValueType() /*NOLINT*/ : value({}) {};
-    // ValueType(ValueType const& v) = delete;
-    // ValueType(Value const& v) = delete;
-    ValueType(Value&& v) /*NOLINT*/ : value(std::move(v)) {};
-    ValueType(Value v) /*NOLINT*/ : value(std::move(v)) {};
-    // ValueType(ValueType&& v) noexcept
-    //     : value(std::move(v.value)){};
-    ValueType(std::vector<ValueType>&& v) /*NOLINT*/ : value(std::move(v)) {};
-    ValueType(std::unordered_map<std::string, ValueType>&& v) /*NOLINT*/ : value(std::move(v)) {};
+    ValueType()                 = default;
+    ValueType(ValueType const&) = default;
+    ValueType(ValueType&&)      = default;
     template <typename T>
-    ValueType(T const& v) /*NOLINT*/ : value(Value(v)){};
+    ValueType(T&& v) /*NOLINT*/ : value(std::forward(v)) {}
 };
 
 template <typename Ty>
@@ -521,22 +482,6 @@ ValueType pack(T val) {
     } else return packValue(std::forward<T>(val));
 }
 
-#else
-
-// Use string as value type because it is easy to convert between script types and native types
-using ValueType = std::string; // Json string
-
-template <typename T>
-std::remove_reference_t<T> extract(ValueType const& val) {
-    return nlohmann::json::parse(val).get<std::remove_reference_t<T>>();
-}
-
-template <typename T>
-ValueType pack(T const& val) {
-    return nlohmann::json(val).dump();
-}
-
-#endif // TEST_NEW_VALUE_TYPE
 
 using CallbackFn = std::function<ValueType(std::vector<ValueType>)>;
 
@@ -544,15 +489,14 @@ struct ExportedFuncData {
     void*      handle;
     CallbackFn callback;
 };
-
-__declspec(dllexport) extern CallbackFn const EMPTY_FUNC;
-__declspec(dllexport) bool                    exportFunc(
+REMOTE_CALL_API extern CallbackFn const EMPTY_FUNC;
+REMOTE_CALL_API bool                    exportFunc(
                        std::string const& nameSpace,
                        std::string const& funcName,
                        CallbackFn&&       callback,
                        void*              handle = ll::sys_utils::getCurrentModuleHandle()
                    );
-__declspec(dllexport) CallbackFn const& importFunc(std::string const& nameSpace, std::string const& funcName);
+REMOTE_CALL_API CallbackFn const& importFunc(std::string const& nameSpace, std::string const& funcName);
 
 inline ValueType _expandArg(std::vector<ValueType>& args, int& index) { return std::move(args[--index]); }
 
@@ -572,11 +516,11 @@ _exportAs(std::string const& nameSpace, std::string const& funcName, std::functi
     return exportFunc(nameSpace, funcName, std::move(cb), ll::sys_utils::getCurrentModuleHandle());
 }
 
-__declspec(dllexport) bool hasFunc(std::string const& nameSpace, std::string const& funcName);
-__declspec(dllexport) bool removeFunc(std::string const& nameSpace, std::string const& funcName);
-__declspec(dllexport) int  removeNameSpace(std::string const& nameSpace);
-__declspec(dllexport) int  removeFuncs(std::vector<std::pair<std::string, std::string>>& funcs);
-__declspec(dllexport) void _onCallError(std::string const& msg, void* handle = ll::sys_utils::getCurrentModuleHandle());
+REMOTE_CALL_API bool hasFunc(std::string const& nameSpace, std::string const& funcName);
+REMOTE_CALL_API bool removeFunc(std::string const& nameSpace, std::string const& funcName);
+REMOTE_CALL_API int  removeNameSpace(std::string const& nameSpace);
+REMOTE_CALL_API int  removeFuncs(std::vector<std::pair<std::string, std::string>>& funcs);
+REMOTE_CALL_API void _onCallError(std::string const& msg, void* handle = ll::sys_utils::getCurrentModuleHandle());
 
 template <typename RTN, typename... Args>
 inline bool _importAs(std::string const& nameSpace, std::string const& funcName, std::function<RTN(Args...)>& func) {
