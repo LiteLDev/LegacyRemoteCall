@@ -327,8 +327,17 @@ struct ValueType {
     ValueType()                 = default;
     ValueType(ValueType const&) = default;
     ValueType(ValueType&&)      = default;
-    template <typename T>
-    ValueType(T&& v) /*NOLINT*/ : value(std::forward(v)) {}
+    // only participate in overload resolution when:
+    //  - T is not ValueType (avoid recursive/ambiguous conversion)
+    //  - Type (the internal std::variant) is constructible from T
+    template <
+        typename T,
+        typename = std::enable_if_t<
+            !std::is_same_v<std::remove_cv_t<std::remove_reference_t<T>>, ValueType>
+            && std::is_constructible_v<Type, T>
+        >
+    >
+    ValueType(T&& v) /*NOLINT*/ : value(std::forward<T>(v)) {}
 };
 
 template <typename Ty>
