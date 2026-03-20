@@ -1,10 +1,12 @@
 #include "RemoteCallAPI.h"
 
+#include "LegacyRemoteCall.h"
 #include "ll/api/io/Logger.h"
 #include "ll/api/utils/StringUtils.h"
 
 
 namespace RemoteCall {
+ll::io::Logger& getLogger() { return legacy_remote_call_api::LegacyRemoteCallAPI::getInstance().getSelf().getLogger(); }
 struct TransparentHasher {
     using is_transparent = void;
     auto operator()(const std::string& key) const { return std::hash<std::string>{}(key); }
@@ -13,9 +15,6 @@ struct TransparentHasher {
 };
 CallbackFn const                                                                                  EMPTY_FUNC{};
 std::unordered_map<std::string, RemoteCall::ExportedFuncData, TransparentHasher, std::equal_to<>> exportedFuncs;
-
-extern ll::io::Logger& getLogger();
-
 bool exportFunc(std::string const& nameSpace, std::string const& funcName, CallbackFn&& callback, void* handle) {
     if (nameSpace.find("::") != std::string::npos) {
         getLogger().error("Namespace can't includes \"::\"");
@@ -69,6 +68,11 @@ int removeFuncs(std::vector<std::pair<std::string, std::string>>& funcs) {
 
 void removeAllFunc() { exportedFuncs.clear(); }
 
+void _onCallError(std::string const& msg, void* handle) {
+    getLogger().error(msg);
+    auto plugin = ll::mod::NativeMod::getByHandle(handle);
+    if (plugin) getLogger().error("In plugin <{}>", plugin->getManifest().name);
+}
 } // namespace RemoteCall
 
 static_assert(RemoteCall::is_supported_type_v<void>);

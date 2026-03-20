@@ -1,5 +1,6 @@
 #pragma once
 #include "fmt/core.h"
+#include "ll/api/base/TypeTraits.h"
 #include "ll/api/utils/SystemUtils.h"
 #include "mc/deps/core/math/Vec3.h"
 #include "mc/nbt/CompoundTag.h"
@@ -257,16 +258,39 @@ struct BlockPosType {
 
 // std::string  -> json
 // std::string* -> bytes
-#define ExtraType                                                                                                      \
-    std::nullptr_t, NumberType, Player*, Actor*, BlockActor*, Container*, WorldPosType, BlockPosType, ItemType,        \
-        BlockType, NbtType
-#define ElementType bool, std::string, ExtraType
-template <typename Ty, class... Types>
-static constexpr bool is_one_of_v = std::_Meta_find_unique_index<std::variant<Types...>, Ty>::value < sizeof...(Types);
 template <typename Ty>
-static constexpr bool is_extra_type_v = std::_Is_any_of_v<Ty, ExtraType>;
+static constexpr bool is_extra_type_v = ll::traits::is_one_of_v<
+    Ty,
+    std::nullptr_t,
+    NumberType,
+    Player*,
+    Actor*,
+    BlockActor*,
+    Container*,
+    WorldPosType,
+    BlockPosType,
+    ItemType,
+    BlockType,
+    NbtType>;
 
-static_assert(sizeof(std::variant<ElementType>) == sizeof(std::string) + 8);
+
+static_assert(
+    sizeof(std::variant<
+           bool,
+           std ::string,
+           std ::nullptr_t,
+           NumberType,
+           Player*,
+           Actor*,
+           BlockActor*,
+           Container*,
+           WorldPosType,
+           BlockPosType,
+           ItemType,
+           BlockType,
+           NbtType>)
+    == sizeof(std::string) + 8
+);
 
 template <typename>
 constexpr bool is_vector_v = false;
@@ -278,7 +302,20 @@ template <class Kty, class Ty, class Pr, class Alloc>
 constexpr bool is_map_v<std::map<Kty, Ty, Pr, Alloc>> = true;
 template <class Kty, class Ty, class Hasher, class Keyeq, class Alloc>
 constexpr bool is_map_v<std::unordered_map<Kty, Ty, Hasher, Keyeq, Alloc>> = true;
-using Value                                                                = std::variant<ElementType>;
+using Value                                                                = std::variant<
+                                                                   bool,
+                                                                   std ::string,
+                                                                   std ::nullptr_t,
+                                                                   NumberType,
+                                                                   Player*,
+                                                                   Actor*,
+                                                                   BlockActor*,
+                                                                   Container*,
+                                                                   WorldPosType,
+                                                                   BlockPosType,
+                                                                   ItemType,
+                                                                   BlockType,
+                                                                   NbtType>;
 // struct Value
 //{
 //     std::variant<ElementType> value;
@@ -335,10 +372,26 @@ struct ValueType {
 
 template <typename Ty>
 static constexpr bool is_supported_type_v =
-    std::is_void_v<Ty> || is_one_of_v<Ty, ElementType> || std::is_assignable_v<NumberType, Ty>
-    || std::is_assignable_v<NbtType, Ty> || std::is_assignable_v<BlockType, Ty> || std::is_assignable_v<ItemType, Ty>
-    || std::is_assignable_v<WorldPosType, Ty> || std::is_assignable_v<BlockPosType, Ty>
-    || std::is_base_of_v<Player, std::remove_pointer_t<Ty>> || std::is_base_of_v<Actor, std::remove_pointer_t<Ty>>;
+    std::is_void_v<Ty>
+    || ll::traits::is_one_of_v<
+        Ty,
+        bool,
+        std ::string,
+        std ::nullptr_t,
+        NumberType,
+        Player*,
+        Actor*,
+        BlockActor*,
+        Container*,
+        WorldPosType,
+        BlockPosType,
+        ItemType,
+        BlockType,
+        NbtType>
+    || std::is_assignable_v<NumberType, Ty> || std::is_assignable_v<NbtType, Ty> || std::is_assignable_v<BlockType, Ty>
+    || std::is_assignable_v<ItemType, Ty> || std::is_assignable_v<WorldPosType, Ty>
+    || std::is_assignable_v<BlockPosType, Ty> || std::is_base_of_v<Player, std::remove_pointer_t<Ty>>
+    || std::is_base_of_v<Actor, std::remove_pointer_t<Ty>>;
 
 template <typename RTN>
 RTN extract(ValueType&& val);
@@ -349,7 +402,22 @@ template <typename RTN>
 RTN extractValue(Value&& value) {
     using Type = std::remove_const_t<std::remove_reference_t<RTN>>;
     static_assert(is_supported_type_v<Type>, "Unsupported Type:");
-    if constexpr (is_one_of_v<Type, ElementType>) return std::get<Type>(value);
+    if constexpr (ll::traits::is_one_of_v<
+                      Type,
+                      bool,
+                      std ::string,
+                      std ::nullptr_t,
+                      NumberType,
+                      Player*,
+                      Actor*,
+                      BlockActor*,
+                      Container*,
+                      WorldPosType,
+                      BlockPosType,
+                      ItemType,
+                      BlockType,
+                      NbtType>)
+        return std::get<Type>(value);
     else if constexpr (std::is_assignable_v<NumberType, RTN>) return std::get<NumberType>(value).get<Type>();
     else if constexpr (std::is_assignable_v<NbtType, RTN>) return std::get<NbtType>(value).get<Type>();
     else if constexpr (std::is_assignable_v<ItemType, RTN>) return std::get<ItemType>(value).get<Type>();
@@ -397,7 +465,22 @@ template <typename T>
 ValueType packValue(T val) {
     using RawType = std::remove_reference_t<std::remove_const_t<T>>;
     static_assert(is_supported_type_v<RawType>, "Unsupported Type");
-    if constexpr (is_one_of_v<RawType, ElementType>) return ValueType(std::forward<T>(val));
+    if constexpr (ll::traits::is_one_of_v<
+                      RawType,
+                      bool,
+                      std ::string,
+                      std ::nullptr_t,
+                      NumberType,
+                      Player*,
+                      Actor*,
+                      BlockActor*,
+                      Container*,
+                      WorldPosType,
+                      BlockPosType,
+                      ItemType,
+                      BlockType,
+                      NbtType>)
+        return ValueType(std::forward<T>(val));
     else if constexpr (std::is_assignable_v<NumberType, T>) return ValueType(NumberType{std::forward<T>(val)});
     else if constexpr (std::is_assignable_v<NbtType, T>) return ValueType(NbtType(std::forward<T>(val)));
     else if constexpr (std::is_assignable_v<ItemType, T>) return ValueType(ItemType(std::forward<T>(val)));
