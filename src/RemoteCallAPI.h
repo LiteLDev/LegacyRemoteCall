@@ -1,9 +1,9 @@
 #pragma once
-#include "fmt/core.h"
+#include "fmt/format.h"
 #include "ll/api/base/TypeTraits.h"
 #include "ll/api/utils/SystemUtils.h"
 #include "mc/deps/core/math/Vec3.h"
-#include "mc/nbt/CompoundTag.h"
+#include "mc/deps/nbt/CompoundTag.h"
 #include "mc/world/Container.h"
 #include "mc/world/actor/player/Player.h"
 #include "mc/world/item/ItemStack.h"
@@ -334,9 +334,7 @@ struct ValueType {
         typename T,
         typename = std::enable_if_t<
             !std::is_same_v<std::remove_cv_t<std::remove_reference_t<T>>, ValueType>
-            && std::is_constructible_v<Type, T>
-        >
-    >
+            && std::is_constructible_v<Type, T>>>
     ValueType(T&& v) /*NOLINT*/ : value(std::forward<T>(v)) {}
 };
 
