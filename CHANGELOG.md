@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-07-04
+
+### Changed
+
+- Adapted to LeviLamina 26.20.*
+
 ## [0.18.0] - 2026-04-07
 
 ### Changed
@@ -91,7 +97,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Support LeviLamina 1.0.0-rc.3
 
-[Unreleased]: https://github.com/LiteLDev/LegacyRemoteCall/compare/v0.18.0...HEAD
+[Unreleased]: https://github.com/LiteLDev/LegacyRemoteCall/compare/v0.19.0...HEAD
+[0.19.0]: https://github.com/LiteLDev/LegacyRemoteCall/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/LiteLDev/LegacyRemoteCall/compare/v0.17.2...v0.18.0
 [0.17.2]: https://github.com/LiteLDev/LegacyRemoteCall/compare/v0.17.1...v0.17.2
 [0.17.1]: https://github.com/LiteLDev/LegacyRemoteCall/compare/v0.17.0...v0.17.1
