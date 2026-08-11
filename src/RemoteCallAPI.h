@@ -204,7 +204,11 @@ struct NumberType {
     NumberType(unsigned char v) noexcept /*NOLINT*/ : i(static_cast<__int64>(v)), f(static_cast<double>(v)) {};
     template <typename RTN>
     inline std::enable_if_t<std::is_integral_v<RTN> || std::is_floating_point_v<RTN>, RTN> get() {
-        return static_cast<RTN>(i);
+        if constexpr (std::is_floating_point_v<RTN>) {
+            return static_cast<RTN>(f);
+        } else {
+            return static_cast<RTN>(i);
+        }
     };
 };
 
@@ -386,12 +390,21 @@ RTN extractValue(Value&& value) {
                       BlockType,
                       NbtType>)
         return std::get<Type>(value);
-    else if constexpr (std::is_assignable_v<NumberType, RTN>) return std::get<NumberType>(value).get<Type>();
+    else if constexpr (std::is_assignable_v<NumberType, RTN>) {
+        static_assert(!std::is_reference_v<RTN>, "Cannot extract reference from NumberType conversion!");
+        return std::get<NumberType>(value).get<Type>();
+    }
     else if constexpr (std::is_assignable_v<NbtType, RTN>) return std::get<NbtType>(value).get<Type>();
     else if constexpr (std::is_assignable_v<ItemType, RTN>) return std::get<ItemType>(value).get<Type>();
     else if constexpr (std::is_assignable_v<BlockType, RTN>) return std::get<BlockType>(value).get<Type>();
-    else if constexpr (std::is_assignable_v<WorldPosType, RTN>) return std::get<WorldPosType>(value).get<Type>();
-    else if constexpr (std::is_assignable_v<BlockPosType, RTN>) return std::get<BlockPosType>(value).get<Type>();
+    else if constexpr (std::is_assignable_v<WorldPosType, RTN>) {
+        static_assert(!std::is_reference_v<RTN>, "Cannot extract reference from WorldPosType conversion!");
+        return std::get<WorldPosType>(value).get<Type>();
+    }
+    else if constexpr (std::is_assignable_v<BlockPosType, RTN>) {
+        static_assert(!std::is_reference_v<RTN>, "Cannot extract reference from BlockPosType conversion!");
+        return std::get<BlockPosType>(value).get<Type>();
+    }
     else if constexpr (std::is_base_of_v<Player, std::remove_pointer_t<RTN>>)
         return static_cast<RTN>(std::get<Player*>(value));
     else if constexpr (std::is_base_of_v<Actor, std::remove_pointer_t<RTN>>)
