@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.21.1] - 2026-09-08
+
+### Fixed
+
+- Fixed NumberType float truncation and add static_asserts for dangling refs @engsr6982
+
 ## [0.21.0] - 2026-09-08
 
 ### Changed
@@ -109,7 +115,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Support LeviLamina 1.0.0-rc.3
 
-[Unreleased]: https://github.com/LiteLDev/LegacyRemoteCall/compare/v0.21.0...HEAD
+[Unreleased]: https://github.com/LiteLDev/LegacyRemoteCall/compare/v0.21.1...HEAD
+[0.21.1]: https://github.com/LiteLDev/LegacyRemoteCall/compare/v0.21.0...v0.21.1
 [0.21.0]: https://github.com/LiteLDev/LegacyRemoteCall/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/LiteLDev/LegacyRemoteCall/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/LiteLDev/LegacyRemoteCall/compare/v0.18.0...v0.19.0
