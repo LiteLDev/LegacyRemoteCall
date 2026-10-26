@@ -5,5 +5,5 @@
     "platform": "${modPlatform}",
     "type": "native",
     "description": "A part of LegacyScriptEngine",
-    "author": "LiteLDev"
+    "author": "LeviMC"
 }
