@@ -1,0 +1,48 @@
+format = 4
+id = "github.com/LiteLDev/LegacyRemoteCall"
+version = "0.23.0"
+
+[info]
+name = "LegacyRemoteCall"
+description = "A part of LegacyScriptEngine"
+tags = ["library", "lse"]
+
+# The default variant holds the server build for the server side and the client build for the
+# client side. The variant "client" is kept for LeviLauncher and for existing installs and
+# dependents that install LegacyRemoteCall#client.
+
+[[variants.""]]
+side = "server"
+platform = "win-x64"
+
+[variants."".deps]
+"github.com/LiteLDev/LeviLamina" = "26.60.*"
+
+[[variants."".assets]]
+type = "zip"
+urls = ["https://{{id}}/releases/download/v{{version}}/LegacyRemoteCall-server-windows-x64.zip"]
+place = [{ src = "LegacyRemoteCall/", dest = "mods/LegacyRemoteCall/" }]
+
+[[variants.""]]
+side = "client"
+platform = "win-x64"
+
+[variants."".deps]
+"github.com/LiteLDev/LeviLamina#client" = "26.60.*"
+
+[[variants."".assets]]
+type = "zip"
+urls = ["https://{{id}}/releases/download/v{{version}}/LegacyRemoteCall-client-windows-x64.zip"]
+place = [{ src = "LegacyRemoteCall/", dest = "mods/LegacyRemoteCall/" }]
+
+[[variants.client]]
+side = "client"
+platform = "win-x64"
+
+[variants.client.deps]
+"github.com/LiteLDev/LeviLamina#client" = "26.60.*"
+
+[[variants.client.assets]]
+type = "zip"
+urls = ["https://{{id}}/releases/download/v{{version}}/LegacyRemoteCall-client-windows-x64.zip"]
+place = [{ src = "LegacyRemoteCall/", dest = "mods/LegacyRemoteCall/" }]
